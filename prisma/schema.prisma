@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Cliente {
+  id             Int        @id @default(autoincrement())
+  nomeCompleto   String
+  email          String     @unique
+  telefone       String?
+  dataNascimento DateTime?
+  senha          String
+  role           String?
+  enderecos      Endereco[]
+  pedidos        Pedido[]
+}
+
+model Endereco {
+  id          Int     @id @default(autoincrement())
+  rua         String
+  numero      String
+  complemento String?
+  bairro      String
+  cidade      String
+  estado      String
+  cep         String
+  clienteId   Int
+  cliente     Cliente @relation(fields: [clienteId], references: [id])
+}
+
+model Pedido {
+  id           Int          @id @default(autoincrement())
+  dataPedido   DateTime
+  statusPedido String
+  clienteId    Int
+  total        Float?
+  observacao   String?
+  modoEntrega  String?
+  cliente      Cliente      @relation(fields: [clienteId], references: [id])
+  itens        ItemPedido[]
+}
+
+model ItemPedido {
+  id            Int     @id @default(autoincrement())
+  quantidade    Int
+  precoUnitario Float
+  subtotal      Float
+  pedidoId      Int
+  pedido        Pedido  @relation(fields: [pedidoId], references: [id])
+  produtoId     Int
+  produto       Produto @relation(fields: [produtoId], references: [id])
+}
+
+model Produto {
+  id                Int          @id @default(autoincrement())
+  nomeProduto       String
+  descricao         String
+  preco             Float
+  estoqueDisponivel Int
+  status            Boolean?
+  imageUrl          String?
+  categoria         String?
+  ativo             Boolean?
+  isDestaque        Boolean?
+  ItemPedido        ItemPedido[]
+}
+
+model Desconto {
+  id          Int    @id @default(autoincrement())
+  cupom       String
+  porcentagem Int
+}
